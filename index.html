@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naija Life: Hustle & Dynasty</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            green: '#008751',
+                            gold: '#FFD700',
+                            darkBg: '#090D16',
+                            cardBg: '#131C2E',
+                            border: '#1E2D4A'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1e2d4a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #008751; }
+        .glow-gold { box-shadow: 0 0 15px rgba(255, 215, 0, 0.25); }
+        .glow-green { box-shadow: 0 0 15px rgba(0, 135, 81, 0.35); }
+    </style>
+</head>
+<body class="bg-brand-darkBg text-slate-100 min-h-screen font-sans flex flex-col justify-between selection:bg-brand-green selection:text-white">
+
+    <!-- TOP BAR -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-brand-border sticky top-0 z-30 px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="bg-brand-green text-slate-900 font-black text-xl p-2 rounded-xl flex items-center justify-center w-10 h-10 shadow-lg glow-green">
+                🇳🇬
+            </div>
+            <div>
+                <h1 class="font-extrabold text-base sm:text-lg leading-none text-white tracking-wide flex items-center gap-2">
+                    NAIJA LIFE <span class="text-[10px] bg-brand-gold text-slate-900 font-extrabold px-1.5 py-0.5 rounded">HUSTLE & DYNASTY</span>
+                </h1>
+                <p class="text-xs text-slate-400 mt-0.5">
+                    Day <span id="gameDay" class="text-brand-gold font-bold">1</span> | 
+                    <span id="gameTime" class="text-slate-300">08:00 AM</span> | 
+                    📍 <span id="currentLocName" class="text-emerald-400 font-bold">Lagos State</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button onclick="saveGame()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition" title="Save Game">
+                <i class="fas fa-save text-emerald-400"></i> <span class="hidden sm:inline">Save</span>
+            </button>
+            <button id="soundToggleBtn" onclick="toggleAudio()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl border border-slate-700 transition text-xs font-semibold">
+                <i id="soundIcon" class="fas fa-volume-mute text-amber-400"></i>
+            </button>
+            <button onclick="confirmRestart()" class="bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800/50 p-2 rounded-xl text-xs transition" title="Restart Game">
+                <i class="fas fa-rotate-right"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- SETUP MODAL -->
+    <div id="characterModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-brand-cardBg border border-brand-border rounded-2xl max-w-2xl w-full p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-black text-white tracking-tight mb-2">BEGIN YOUR NAIJA JOURNEY 🇳🇬</h2>
+                <p class="text-slate-400 text-sm">Create your avatar and start your path from humble hustler to nationwide icon.</p>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Citizen Full Name</label>
+                <input type="text" id="playerNameInput" value="Emeka Okafor" placeholder="Enter name..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-semibold focus:outline-none focus:border-brand-green">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div onclick="selectBackground('street')" id="bgCard-street" class="bg-slate-900 border-2 border-brand-green rounded-xl p-4 cursor-pointer hover:border-brand-green transition">
+                    <div class="text-3xl mb-2">🚲</div>
+                    <h3 class="font-bold text-white text-sm">Street Grinder</h3>
+                    <p class="text-xs text-slate-400 mt-1">High stamina & street smarts. Started with basic savings.</p>
+                    <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] text-slate-300">
+                        <div>💵 Cash: ₦25,000</div>
+                        <div>🧠 Intelligence: 40</div>
+                        <div>😎 Street Rep: 30</div>
+                    </div>
+                </div>
+
+                <div onclick="selectBackground('student')" id="bgCard-student" class="bg-slate-900 border-2 border-slate-800 rounded-xl p-4 cursor-pointer hover:border-brand-green transition">
+                    <div class="text-3xl mb-2">🎓</div>
+                    <h3 class="font-bold text-white text-sm">Scholar Prodigy</h3>
+                    <p class="text-xs text-slate-400 mt-1">Educated background. High intellect, moderate starting cash.</p>
+                    <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] text-slate-300">
+                        <div>💵 Cash: ₦100,000</div>
+                        <div>🧠 Intelligence: 70</div>
+                        <div>😎 Street Rep: 10</div>
+                    </div>
+                </div>
+
+                <div onclick="selectBackground('wealthy')" id="bgCard-wealthy" class="bg-slate-900 border-2 border-slate-800 rounded-xl p-4 cursor-pointer hover:border-brand-green transition">
+                    <div class="text-3xl mb-2">🏛️</div>
+                    <h3 class="font-bold text-white text-sm">Privileged Heir</h3>
+                    <p class="text-xs text-slate-400 mt-1">Political / Business family. High starting capital.</p>
+                    <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] text-slate-300">
+                        <div>💵 Cash: ₦1,000,000</div>
+                        <div>🧠 Intelligence: 50</div>
+                        <div>😎 Street Rep: 5</div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="w-full bg-brand-green hover:bg-emerald-600 text-slate-900 font-extrabold py-3.5 rounded-xl shadow-lg glow-green transition text-base">
+                ENTER THE SIMULATION <i class="fas fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN GAME LAYOUT -->
+    <main class="max-w-7xl w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
+
+        <!-- LEFT PANEL: PLAYER STATS & STATUS (4 cols) -->
+        <section class="lg:col-span-4 space-y-4">
+            <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-2xl" id="playerAvatar">
+                            🚲
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-base text-white leading-tight" id="dispPlayerName">Emeka Okafor</h2>
+                            <p class="text-xs text-brand-gold font-semibold" id="dispTitle">Street Grinder</p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800" id="legendRank">
+                        🌱 Grassroots
+                    </span>
+                </div>
+
+                <div class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl mb-4 flex justify-between items-center">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Total Capital</span>
+                        <div class="text-2xl font-black text-brand-gold font-mono" id="dispCash">₦25,000</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Monthly Tax</span>
+                        <div class="text-sm font-bold text-red-400 font-mono" id="dispTax">₦0</div>
+                    </div>
+                </div>
+
+                <div class="space-y-2.5 text-xs">
+                    <div>
+                        <div class="flex justify-between font-semibold mb-1">
+                            <span class="text-slate-300"><i class="fas fa-bolt text-amber-400 mr-1"></i> Energy</span>
+                            <span id="valEnergy" class="text-amber-400 font-mono">100/100</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
+                            <div id="barEnergy" class="bg-amber-400 h-full transition-all duration-300" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between font-semibold mb-1">
+                            <span class="text-slate-300"><i class="fas fa-brain text-purple-400 mr-1"></i> Intelligence</span>
+                            <span id="valIntel" class="text-purple-400 font-mono">40/100</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
+                            <div id="barIntel" class="bg-purple-400 h-full transition-all duration-300" style="width: 40%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between font-semibold mb-1">
+                            <span class="text-slate-300"><i class="fas fa-crown text-brand-gold mr-1"></i> Street Rep</span>
+                            <span id="valRep" class="text-brand-gold font-mono">30/100</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
+                            <div id="barRep" class="bg-brand-gold h-full transition-all duration-300" style="width: 30%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between font-semibold mb-1">
+                            <span class="text-slate-300"><i class="fas fa-landmark text-blue-400 mr-1"></i> Civic Standing</span>
+                            <span id="valCivic" class="text-blue-400 font-mono">50/100</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
+                            <div id="barCivic" class="bg-blue-400 h-full transition-all duration-300" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASSETS & DOCUMENTS SUMMARY -->
+            <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 space-y-2.5 text-xs">
+                <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                    <i class="fas fa-id-card text-brand-green"></i> Verified Identification & Assets
+                </h3>
+                <div class="flex justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
+                    <span class="text-slate-400">Passport Status:</span>
+                    <span id="dispPassport" class="font-bold text-red-400">None</span>
+                </div>
+                <div class="flex justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
+                    <span class="text-slate-400">NYSC Certificate:</span>
+                    <span id="dispNYSC" class="font-bold text-slate-500">Not Eligible</span>
+                </div>
+                <div class="flex justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
+                    <span class="text-slate-400">Highest Education:</span>
+                    <span id="dispEdu" class="font-bold text-white">SSCE / WAEC</span>
+                </div>
+                <div class="flex justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
+                    <span class="text-slate-400">Primary Career:</span>
+                    <span id="dispJob" class="font-bold text-brand-gold">Unemployed</span>
+                </div>
+
+                <button onclick="restAtHome()" class="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 p-2.5 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                    <i class="fas fa-bed text-indigo-400"></i> Rest & Recharge (+Energy, -Stress)
+                </button>
+            </div>
+        </section>
+
+        <!-- CENTER PANEL: TAB NAVIGATION & MAIN ACTIONS (5 cols) -->
+        <section class="lg:col-span-5 space-y-4">
+            
+            <!-- Navigation Tabs -->
+            <div class="bg-brand-cardBg border border-brand-border p-1.5 rounded-2xl grid grid-cols-5 gap-1 text-center">
+                <button onclick="switchTab('hustle')" id="tabHustle" class="py-2 rounded-xl font-bold text-[11px] transition text-slate-900 bg-brand-green">
+                    💼 Work
+                </button>
+                <button onclick="switchTab('travel')" id="tabTravel" class="py-2 rounded-xl font-bold text-[11px] transition text-slate-400 hover:text-white">
+                    ✈️ Travel
+                </button>
+                <button onclick="switchTab('education')" id="tabEducation" class="py-2 rounded-xl font-bold text-[11px] transition text-slate-400 hover:text-white">
+                    🎓 School
+                </button>
+                <button onclick="switchTab('civics')" id="tabCivics" class="py-2 rounded-xl font-bold text-[11px] transition text-slate-400 hover:text-white">
+                    🏛️ Civics
+                </button>
+                <button onclick="switchTab('assets')" id="tabAssets" class="py-2 rounded-xl font-bold text-[11px] transition text-slate-400 hover:text-white">
+                    🏠 Assets
+                </button>
+            </div>
+
+            <!-- TAB 1: WORK & CAREERS -->
+            <div id="viewHustle" class="space-y-3">
+                <div class="text-xs text-slate-400 font-semibold px-1">QUICK HUSTLES & CAREERS</div>
+
+                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4">
+                    <h4 class="font-bold text-white text-sm mb-1">POS Terminal Operator</h4>
+                    <p class="text-xs text-slate-400 mb-3">Provide quick cash withdrawals and bill payments at busy bus stops.</p>
+                    <button onclick="doAction('pos_operator')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 w-full p-2.5 rounded-xl text-xs font-bold text-emerald-400 flex justify-between">
+                        <span>Run POS Shift</span>
+                        <span>+₦15,000 | -15⚡</span>
+                    </button>
+                </div>
+
+                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4">
+                    <h4 class="font-bold text-white text-sm mb-1">Nollywood Supporting Actor</h4>
+                    <p class="text-xs text-slate-400 mb-3">Audition for drama series set in Asaba or Lagos.</p>
+                    <button onclick="doAction('nollywood')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 w-full p-2.5 rounded-xl text-xs font-bold text-brand-gold flex justify-between">
+                        <span>Shoot Movie Scene</span>
+                        <span>+₦45,000 | -25⚡ | +5 Rep</span>
+                    </button>
+                </div>
+
+                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4">
+                    <h4 class="font-bold text-white text-sm mb-1">Tech Founder / Startup Freelancer</h4>
+                    <p class="text-xs text-slate-400 mb-3">Build fintech apps or consult for foreign remote clients.</p>
+                    <button onclick="doAction('tech_gig')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 w-full p-2.5 rounded-xl text-xs font-bold text-blue-400 flex justify-between">
+                        <span>Deliver Tech Contract</span>
+                        <span>+₦180,000 | -35⚡ | Req: High Intel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: TRAVEL SYSTEM (36 STATES + GLOBAL) -->
+            <div id="viewTravel" class="space-y-3 hidden">
+                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4">
+                    <h4 class="font-bold text-white text-sm mb-2 flex items-center gap-2">
+                        <i class="fas fa-map-marked-alt text-emerald-400"></i> Interstate & Global Transit
+                    </h4>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 mb-1">Destination Category</label>
+                            <select id="travelCategory" onchange="updateTravelOptions()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white">
+                                <option value="nigeria">🇳🇬 Nigerian States (36 States + FCT Abuja)</option>
+                                <option value="africa">🌍 African Destinations (6 Nations)</option>
+                                <option value="global">✈️ International Destinations (6 Nations)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 mb-1">Select Destination</label>
+                            <select id="travelDestinations" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white">
+                                <!-- Populated dynamically via JS -->
+                            </select>
+                        </div>
+
+                        <button onclick="executeTravel()" class="w-full bg-brand-green hover:bg-emerald-600 text-slate-900 font-extrabold py-3 rounded-xl text-xs shadow-lg glow-green transition">
+                            BOOK TRAVEL NOW
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: EDUCATION -->
+            <div id="viewEducation" class="space-y-3 hidden">
+                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 space-y-3">
+                    <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                        <i class="fas fa-graduation-cap text-purple-400"></i> Academic Progression
+                    </h4>
+
+                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-xs text-white">University Degree (B.Sc / HND)</div>
+                            <div class="text-[10px] text-slate-400">Cost: ₦250,000 | +30 Intelligence</div>
+                        </div>
+                        <button onclick="enrollEdu('University Degree', 250000, 30)" class="bg-brand-green hover:bg-emerald-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition">Enroll</button>
+                    </div>
+
+                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-xs text-white">Professional Cert (ICAN / NIM / SAN)</div>
+                            <div class="text-[10px] text-slate-400">Cost: ₦500,000 | +20 Intel | +25 Civic</div>
+                        </div>
+                        <button onclick="enrollEdu('Professional Cert', 500000, 20)" class="bg-brand-green hover:bg-emerald-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition">Enroll</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: GOVERNMENT & CIVICS -->
+            <div id="viewCivics" class="space-y-3 hidden">
+                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 space-y-3">
+                    <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                        <i class="fas fa-landmark text-blue-400"></i> Government Agencies & Duties
+                    </h4>
+
+                    <!-- NIS Passport -->
+                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-xs text-white">NIS International Passport</div>
+                            <div class="text-[10px] text-slate-400">Cost: ₦75,000 | Required for Foreign Travel</div>
+                        </div>
+                        <button onclick="applyPassport()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">Apply</button>
+                    </div>
+
+                    <!-- NYSC -->
+                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-xs text-white">NYSC National Service</div>
+                            <div class="text-[10px] text-slate-400">Requires University Degree | +15 Civic</div>
+                        </div>
+                        <button onclick="doNYSC()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">Serve</button>
+                    </div>
+
+                    <!-- Politics -->
+                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-xs text-white">Run for House of Assembly / Governor</div>
+                            <div class="text-[10px] text-slate-400">Cost: ₦5,000,000 | Req: 60 Rep & 60 Civic</div>
+                        </div>
+                        <button onclick="runForOffice()" class="bg-brand-gold hover:bg-amber-400 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition">Campaign</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: ASSETS & REAL ESTATE -->
+            <div id="viewAssets" class="space-y-3 hidden">
+                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 space-y-3">
+                    <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                        <i class="fas fa-building text-brand-gold"></i> Landed Property & Holdings
+                    </h4>
+
+                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-xs text-white">Plot of Land in Ibeju-Lekki / Abuja</div>
+                            <div class="text-[10px] text-slate-400">Cost: ₦8,000,000</div>
+                        </div>
+                        <button onclick="buyAsset('Plot of Land', 8000000)" class="bg-brand-gold text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition">Acquire</button>
+                    </div>
+
+                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-xs text-white">Oil Block Shares</div>
+                            <div class="text-[10px] text-slate-400">Cost: ₦50,000,000</div>
+                        </div>
+                        <button onclick="buyAsset('Oil Block Shares', 50000000)" class="bg-brand-gold text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition">Acquire</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: LIVE LOG & EVENT CHRONICLES (3 cols) -->
+        <section class="lg:col-span-3 space-y-4 flex flex-col">
+            <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 flex-1 flex flex-col">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                        <i class="fas fa-stream text-brand-green"></i> Live Feed
+                    </h3>
+                    <span class="text-[10px] text-slate-500 font-mono">Real-time</span>
+                </div>
+                
+                <div id="eventLog" class="flex-1 overflow-y-auto space-y-2 text-xs pr-1 max-h-80 lg:max-h-none">
+                    <!-- Event items dynamically prepended -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
+        Naija Life: Hustle & Dynasty &copy; 2026. Built with ❤️ for the Culture.
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Web Audio API Sound Engine
+        let audioCtx = null;
+        let soundEnabled = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(freq, type = 'sine', duration = 0.1) {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e){}
+        }
+
+        function toggleAudio() {
+            initAudio();
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            icon.className = soundEnabled ? "fas fa-volume-high text-emerald-400" : "fas fa-volume-mute text-amber-400";
+            if (soundEnabled) playSound(523, 'triangle', 0.15);
+        }
+
+        // TRAVEL DATA: 36 STATES + GLOBAL NATIONS
+        const travelData = {
+            nigeria: [
+                "Abia State", "Adamawa State", "Akwa Ibom State", "Anambra State", "Bauchi State", 
+                "Bayelsa State", "Benue State", "Borno State", "Cross River State", "Delta State", 
+                "Ebonyi State", "Edo State", "Ekiti State", "Enugu State", "FCT Abuja", 
+                "Gombe State", "Imo State", "Jigawa State", "Kaduna State", "Kano State", 
+                "Katsina State", "Kebbi State", "Kogi State", "Kwara State", "Lagos State", 
+                "Nasarawa State", "Niger State", "Ogun State", "Ondo State", "Osun State", 
+                "Oyo State", "Plateau State", "Rivers State", "Sokoto State", "Taraba State", 
+                "Yobe State", "Zamfara State"
+            ],
+            africa: [
+                { name: "Ghana (Accra)", cost: 150000, visaReq: false },
+                { name: "Kenya (Nairobi)", cost: 350000, visaReq: false },
+                { name: "South Africa (Johannesburg)", cost: 600000, visaReq: true },
+                { name: "Egypt (Cairo)", cost: 550000, visaReq: true },
+                { name: "Morocco (Casablanca)", cost: 500000, visaReq: true },
+                { name: "Rwanda (Kigali)", cost: 300000, visaReq: false }
+            ],
+            global: [
+                { name: "United Kingdom (London)", cost: 1200000, visaReq: true },
+                { name: "United States (New York)", cost: 1500000, visaReq: true },
+                { name: "Canada (Toronto)", cost: 1600000, visaReq: true },
+                { name: "UAE (Dubai)", cost: 800000, visaReq: true },
+                { name: "China (Guangzhou)", cost: 1100000, visaReq: true },
+                { name: "Germany (Berlin)", cost: 1300000, visaReq: true }
+            ]
+        };
+
+        // GAME STATE
+        let state = {
+            name: "Emeka Okafor",
+            bgKey: "street",
+            day: 1,
+            hour: 8,
+            cash: 25000,
+            energy: 100,
+            intel: 40,
+            rep: 30,
+            civic: 50,
+            location: "Lagos State",
+            passport: false,
+            education: "SSCE / WAEC",
+            nyscServed: false,
+            job: null,
+            tax: 0
+        };
+
+        function selectBackground(key) {
+            state.bgKey = key;
+            document.querySelectorAll('[id^="bgCard-"]').forEach(c => c.classList.replace('border-brand-green', 'border-slate-800'));
+            document.getElementById(`bgCard-${key}`).classList.replace('border-slate-800', 'border-brand-green');
+            playSound(300);
+        }
+
+        function startGame() {
+            initAudio();
+            const inputName = document.getElementById('playerNameInput').value.trim();
+            if (inputName) state.name = inputName;
+
+            if (state.bgKey === 'street') {
+                state.cash = 25000; state.intel = 40; state.rep = 30;
+            } else if (state.bgKey === 'student') {
+                state.cash = 100000; state.intel = 70; state.rep = 10;
+            } else if (state.bgKey === 'wealthy') {
+                state.cash = 1000000; state.intel = 50; state.rep = 5;
+            }
+
+            document.getElementById('characterModal').classList.add('hidden');
+            addLog("🇳🇬 Welcome to Naija Life! Your nationwide simulation begins now.", "gold");
+            updateTravelOptions();
+            updateUI();
+            playSound(600, 'triangle', 0.25);
+        }
+
+        function updateUI() {
+            document.getElementById('dispPlayerName').innerText = state.name;
+            document.getElementById('dispCash').innerText = `₦${state.cash.toLocaleString()}`;
+            document.getElementById('dispTax').innerText = `₦${state.tax.toLocaleString()}`;
+            document.getElementById('gameDay').innerText = state.day;
+            document.getElementById('currentLocName').innerText = state.location;
+
+            document.getElementById('valEnergy').innerText = `${state.energy}/100`;
+            document.getElementById('barEnergy').style.width = `${state.energy}%`;
+
+            document.getElementById('valIntel').innerText = `${state.intel}/100`;
+            document.getElementById('barIntel').style.width = `${state.intel}%`;
+
+            document.getElementById('valRep').innerText = `${state.rep}/100`;
+            document.getElementById('barRep').style.width = `${state.rep}%`;
+
+            document.getElementById('valCivic').innerText = `${state.civic}/100`;
+            document.getElementById('barCivic').style.width = `${state.civic}%`;
+
+            document.getElementById('dispPassport').innerText = state.passport ? "Verified" : "None";
+            document.getElementById('dispPassport').className = state.passport ? "font-bold text-emerald-400" : "font-bold text-red-400";
+
+            document.getElementById('dispNYSC').innerText = state.nyscServed ? "Completed" : (state.education.includes("University") ? "Eligible" : "Not Eligible");
+            document.getElementById('dispEdu').innerText = state.education;
+            document.getElementById('dispJob').innerText = state.job || "Unemployed";
+        }
+
+        function addLog(msg, type = "normal") {
+            const logBox = document.getElementById('eventLog');
+            const item = document.createElement('div');
+            let color = "bg-slate-900 border-slate-800 text-slate-300";
+            if (type === "gold") color = "bg-amber-950/40 border-amber-800 text-amber-300 font-semibold";
+            if (type === "green") color = "bg-emerald-950/40 border-emerald-800 text-emerald-300 font-semibold";
+            if (type === "red") color = "bg-red-950/40 border-red-800 text-red-300";
+
+            item.className = `p-2 rounded-xl border ${color} text-xs`;
+            item.innerHTML = `<span class="text-[9px] opacity-60 block font-mono">Day ${state.day}</span>${msg}`;
+            logBox.prepend(item);
+        }
+
+        // TRAVEL CONTROLLER
+        function updateTravelOptions() {
+            const category = document.getElementById('travelCategory').value;
+            const select = document.getElementById('travelDestinations');
+            select.innerHTML = '';
+
+            if (category === 'nigeria') {
+                travelData.nigeria.forEach(stateName => {
+                    const opt = document.createElement('option');
+                    opt.value = stateName;
+                    opt.innerText = `${stateName} (Bus / Flight: ₦25,000)`;
+                    select.appendChild(opt);
+                });
+            } else {
+                travelData[category].forEach(dest => {
+                    const opt = document.createElement('option');
+                    opt.value = JSON.stringify(dest);
+                    opt.innerText = `${dest.name} - ₦${dest.cost.toLocaleString()} ${dest.visaReq ? '(Visa Required)' : '(No Visa)'}`;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        function executeTravel() {
+            const category = document.getElementById('travelCategory').value;
+            const rawVal = document.getElementById('travelDestinations').value;
+
+            if (category === 'nigeria') {
+                if (state.cash < 25000) return addLog("❌ Not enough funds for interstate travel!", "red");
+                state.cash -= 25000;
+                state.location = rawVal;
+                addLog(`🚌 Traveled safely to ${rawVal}.`, "green");
+            } else {
+                const dest = JSON.parse(rawVal);
+                if (dest.visaReq && !state.passport) {
+                    addLog(`❌ Travel denied! You need an NIS International Passport to visit ${dest.name}.`, "red");
+                    return;
+                }
+                if (state.cash < dest.cost) {
+                    addLog(`❌ Insufficient cash to book flight to ${dest.name}!`, "red");
+                    return;
+                }
+                state.cash -= dest.cost;
+                state.location = dest.name;
+                addLog(`✈️ Flight landed in ${dest.name}! Welcome abroad!`, "gold");
+            }
+            playSound(500, 'triangle', 0.2);
+            updateUI();
+        }
+
+        // ACTIONS
+        function doAction(type) {
+            if (state.energy < 15) return addLog("🛑 Exhausted! Rest before working.", "red");
+
+            if (type === 'pos_operator') {
+                state.cash += 15000; state.energy -= 15;
+                addLog("🏧 Managed POS transactions. Made ₦15,000 profit.", "green");
+            } else if (type === 'nollywood') {
+                state.cash += 45000; state.energy -= 25; state.rep += 5;
+                addLog("🎬 Performed movie scene! Earned ₦45,000 & +5 Street Rep.", "gold");
+            } else if (type === 'tech_gig') {
+                if (state.intel < 60) return addLog("❌ Intelligence too low for advanced tech gigs!", "red");
+                state.cash += 180000; state.energy -= 35;
+                addLog("💻 Delivered fintech app feature. Received ₦180,000 payout!", "green");
+            }
+            playSound(440);
+            updateUI();
+        }
+
+        function restAtHome() {
+            state.energy = 100;
+            state.day++;
+            addLog(`🛌 Slept well. Day ${state.day} in ${state.location} begins!`, "green");
+            playSound(350);
+            updateUI();
+        }
+
+        function enrollEdu(title, cost, intelGain) {
+            if (state.cash < cost) return addLog(`❌ Need ₦${cost.toLocaleString()} for enrollment!`, "red");
+            state.cash -= cost;
+            state.intel += intelGain;
+            state.education = title;
+            addLog(`🎓 Successfully graduated with a ${title}! (+${intelGain} Intelligence)`, "gold");
+            playSound(600);
+            updateUI();
+        }
+
+        function applyPassport() {
+            if (state.cash < 75000) return addLog("❌ Need ₦75,000 for NIS Passport issuance!", "red");
+            state.cash -= 75000;
+            state.passport = true;
+            addLog("🛂 NIS International Passport issued successfully!", "gold");
+            playSound(600);
+            updateUI();
+        }
+
+        function doNYSC() {
+            if (!state.education.includes("University")) return addLog("❌ You must earn a University Degree first!", "red");
+            if (state.nyscServed) return addLog("❌ You have already completed NYSC!", "red");
+            state.nyscServed = true;
+            state.civic += 25;
+            addLog("🎖️ Served Nigeria for NYSC mandatory year! (+25 Civic Standing)", "gold");
+            playSound(600);
+            updateUI();
+        }
+
+        function runForOffice() {
+            if (state.cash < 5000000 || state.rep < 60) return addLog("❌ Requires ₦5,000,000 campaign funds and 60 Rep!", "red");
+            state.cash -= 5000000;
+            state.job = "State Governor";
+            addLog("🏛️ ELECTION VICTORY! You have been sworn in as Governor!", "gold");
+            playSound(800, 'triangle', 0.4);
+            updateUI();
+        }
+
+        function buyAsset(name, cost) {
+            if (state.cash < cost) return addLog(`❌ Insufficient funds to buy ${name}!`, "red");
+            state.cash -= cost;
+            addLog(`🏰 Purchased ${name} successfully! Asset added to your portfolio.`, "gold");
+            playSound(700);
+            updateUI();
+        }
+
+        function switchTab(tab) {
+            ['Hustle', 'Travel', 'Education', 'Civics', 'Assets'].forEach(t => {
+                document.getElementById(`view${t}`).classList.add('hidden');
+                document.getElementById(`tab${t}`).className = "py-2 rounded-xl font-bold text-[11px] transition text-slate-400 hover:text-white";
+            });
+            document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
+            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "py-2 rounded-xl font-bold text-[11px] transition text-slate-900 bg-brand-green";
+            playSound(300);
+        }
+
+        // SAVE / LOAD SYSTEM
+        function saveGame() {
+            localStorage.setItem('naijaLifeSave', JSON.stringify(state));
+            addLog("💾 Game progress saved to browser memory!", "green");
+            playSound(650);
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('naijaLifeSave');
+            if (saved) {
+                state = JSON.parse(saved);
+                document.getElementById('characterModal').classList.add('hidden');
+                updateTravelOptions();
+                updateUI();
+                addLog("📂 Saved game loaded successfully!", "gold");
+            }
+        }
+
+        function confirmRestart() {
+            if (confirm("Reset current simulation and restart?")) {
+                localStorage.removeItem('naijaLifeSave');
+                location.reload();
+            }
+        }
+
+        // Auto Load on Startup if Save Exists
+        window.onload = () => {
+            if (localStorage.getItem('naijaLifeSave')) {
+                loadGame();
+            }
+        };
+    </script>
+</body>
+</html>
