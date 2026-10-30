@@ -2,8 +2,8 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Naija Life: Hustle & Dynasty</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Naija Life: Open World & Dynasty</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -15,9 +15,9 @@
                         brand: {
                             green: '#008751',
                             gold: '#FFD700',
-                            darkBg: '#090D16',
-                            cardBg: '#131C2E',
-                            border: '#1E2D4A'
+                            darkBg: '#0B0F19',
+                            cardBg: '#151D2A',
+                            border: '#233044'
                         }
                     }
                 }
@@ -26,714 +26,590 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #090d16; }
-        ::-webkit-scrollbar-thumb { background: #1e2d4a; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #008751; }
-        .glow-gold { box-shadow: 0 0 15px rgba(255, 215, 0, 0.25); }
-        .glow-green { box-shadow: 0 0 15px rgba(0, 135, 81, 0.35); }
+        * { user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #233044; border-radius: 4px; }
+        canvas { display: block; image-rendering: pixelated; }
+        .touch-btn { touch-action: none; }
     </style>
 </head>
-<body class="bg-brand-darkBg text-slate-100 min-h-screen font-sans flex flex-col justify-between selection:bg-brand-green selection:text-white">
+<body class="bg-brand-darkBg text-slate-100 min-h-screen font-sans flex flex-col overflow-x-hidden selection:bg-brand-green selection:text-white">
 
-    <!-- TOP BAR -->
-    <header class="bg-slate-900/90 backdrop-blur-md border-b border-brand-border sticky top-0 z-30 px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="bg-brand-green text-slate-900 font-black text-xl p-2 rounded-xl flex items-center justify-center w-10 h-10 shadow-lg glow-green">
-                🇳🇬
+    <!-- CHARACTER CREATION MODAL -->
+    <div id="characterModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-brand-cardBg border border-brand-border rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="text-center">
+                <div class="w-14 h-14 bg-brand-green text-slate-900 rounded-2xl mx-auto flex items-center justify-center text-3xl font-black mb-3">🇳🇬</div>
+                <h2 class="text-2xl font-black text-white">NAIJA LIFE: OPEN WORLD</h2>
+                <p class="text-xs text-slate-400 mt-1">Walk the streets, drive cars, build a family, and chat with citizens.</p>
             </div>
+
             <div>
-                <h1 class="font-extrabold text-base sm:text-lg leading-none text-white tracking-wide flex items-center gap-2">
-                    NAIJA LIFE <span class="text-[10px] bg-brand-gold text-slate-900 font-extrabold px-1.5 py-0.5 rounded">HUSTLE & DYNASTY</span>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Choose Citizen Username</label>
+                <input type="text" id="usernameInput" value="Sammy_Hustler" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-semibold focus:outline-none focus:border-brand-green">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Select Starting Avatar</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="selectSkin('male_hustler')" id="skin-male_hustler" class="p-3 bg-slate-900 border-2 border-brand-green rounded-xl text-center">
+                        <div class="text-2xl mb-1">🕺</div>
+                        <div class="text-[11px] font-bold">Guy Hustler</div>
+                    </button>
+                    <button onclick="selectSkin('female_hustler')" id="skin-female_hustler" class="p-3 bg-slate-900 border-2 border-slate-800 rounded-xl text-center">
+                        <div class="text-2xl mb-1">💃</div>
+                        <div class="text-[11px] font-bold">Lekki Queen</div>
+                    </button>
+                    <button onclick="selectSkin('tech_bro')" id="skin-tech_bro" class="p-3 bg-slate-900 border-2 border-slate-800 rounded-xl text-center">
+                        <div class="text-2xl mb-1">🧑‍💻</div>
+                        <div class="text-[11px] font-bold">Tech Bro</div>
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="confirmCharacter()" class="w-full bg-brand-green hover:bg-emerald-600 text-slate-900 font-extrabold py-3.5 rounded-xl transition">
+                SPAWN IN NIGERIA <i class="fas fa-play ml-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN HEADER BAR -->
+    <header class="bg-slate-900/90 border-b border-brand-border px-4 py-2.5 flex justify-between items-center z-20">
+        <div class="flex items-center gap-3">
+            <span class="text-xl">🇳🇬</span>
+            <div>
+                <h1 class="font-extrabold text-sm sm:text-base leading-none text-white flex items-center gap-2">
+                    <span id="displayUsername" class="text-emerald-400">Sammy_Hustler</span>
+                    <span class="text-[10px] bg-brand-gold text-slate-900 font-black px-1.5 py-0.5 rounded" id="displayLocation">LAGOS STREETS</span>
                 </h1>
-                <p class="text-xs text-slate-400 mt-0.5">
-                    Day <span id="gameDay" class="text-brand-gold font-bold">1</span> | 
-                    <span id="gameTime" class="text-slate-300">08:00 AM</span> | 
-                    📍 <span id="currentLocName" class="text-emerald-400 font-bold">Lagos State</span>
+                <p class="text-[11px] text-slate-400 mt-0.5">
+                    💵 Cash: <span id="dispCash" class="text-brand-gold font-bold">₦150,000</span> | 
+                    ⚡ Energy: <span id="dispEnergy" class="text-amber-400 font-bold">100/100</span>
                 </p>
             </div>
         </div>
 
         <div class="flex items-center gap-2">
-            <button onclick="saveGame()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition" title="Save Game">
-                <i class="fas fa-save text-emerald-400"></i> <span class="hidden sm:inline">Save</span>
+            <button onclick="toggleFamilyTree()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold transition">
+                👨‍👩‍👧‍👦 Family (<span id="familyCount">4</span>)
             </button>
-            <button id="soundToggleBtn" onclick="toggleAudio()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl border border-slate-700 transition text-xs font-semibold">
-                <i id="soundIcon" class="fas fa-volume-mute text-amber-400"></i>
-            </button>
-            <button onclick="confirmRestart()" class="bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800/50 p-2 rounded-xl text-xs transition" title="Restart Game">
-                <i class="fas fa-rotate-right"></i>
+            <button onclick="saveGame()" class="bg-emerald-950/80 text-emerald-400 border border-emerald-800 px-3 py-1.5 rounded-xl text-xs font-bold">
+                💾 Save
             </button>
         </div>
     </header>
 
-    <!-- SETUP MODAL -->
-    <div id="characterModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-brand-cardBg border border-brand-border rounded-2xl max-w-2xl w-full p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <div class="text-center mb-6">
-                <h2 class="text-3xl font-black text-white tracking-tight mb-2">BEGIN YOUR NAIJA JOURNEY 🇳🇬</h2>
-                <p class="text-slate-400 text-sm">Create your avatar and start your path from humble hustler to nationwide icon.</p>
-            </div>
+    <!-- GAME CONTAINER -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-2 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
 
-            <div class="mb-5">
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Citizen Full Name</label>
-                <input type="text" id="playerNameInput" value="Emeka Okafor" placeholder="Enter name..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-semibold focus:outline-none focus:border-brand-green">
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div onclick="selectBackground('street')" id="bgCard-street" class="bg-slate-900 border-2 border-brand-green rounded-xl p-4 cursor-pointer hover:border-brand-green transition">
-                    <div class="text-3xl mb-2">🚲</div>
-                    <h3 class="font-bold text-white text-sm">Street Grinder</h3>
-                    <p class="text-xs text-slate-400 mt-1">High stamina & street smarts. Started with basic savings.</p>
-                    <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] text-slate-300">
-                        <div>💵 Cash: ₦25,000</div>
-                        <div>🧠 Intelligence: 40</div>
-                        <div>😎 Street Rep: 30</div>
-                    </div>
+        <!-- 2D CANVAS GAME VIEW (8 Cols) -->
+        <div class="lg:col-span-8 flex flex-col gap-3">
+            
+            <div class="relative bg-slate-950 border border-brand-border rounded-2xl overflow-hidden shadow-2xl flex-1 flex flex-col items-center justify-center min-h-[380px]">
+                <canvas id="gameCanvas" width="800" height="480" class="w-full h-full object-contain"></canvas>
+                
+                <!-- On-Screen Notification Overlay -->
+                <div id="gameNotification" class="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900/90 border border-brand-gold text-brand-gold px-4 py-2 rounded-xl text-xs font-bold hidden transition backdrop-blur-md shadow-xl pointer-events-none">
+                    Notification text
                 </div>
 
-                <div onclick="selectBackground('student')" id="bgCard-student" class="bg-slate-900 border-2 border-slate-800 rounded-xl p-4 cursor-pointer hover:border-brand-green transition">
-                    <div class="text-3xl mb-2">🎓</div>
-                    <h3 class="font-bold text-white text-sm">Scholar Prodigy</h3>
-                    <p class="text-xs text-slate-400 mt-1">Educated background. High intellect, moderate starting cash.</p>
-                    <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] text-slate-300">
-                        <div>💵 Cash: ₦100,000</div>
-                        <div>🧠 Intelligence: 70</div>
-                        <div>😎 Street Rep: 10</div>
-                    </div>
-                </div>
-
-                <div onclick="selectBackground('wealthy')" id="bgCard-wealthy" class="bg-slate-900 border-2 border-slate-800 rounded-xl p-4 cursor-pointer hover:border-brand-green transition">
-                    <div class="text-3xl mb-2">🏛️</div>
-                    <h3 class="font-bold text-white text-sm">Privileged Heir</h3>
-                    <p class="text-xs text-slate-400 mt-1">Political / Business family. High starting capital.</p>
-                    <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] text-slate-300">
-                        <div>💵 Cash: ₦1,000,000</div>
-                        <div>🧠 Intelligence: 50</div>
-                        <div>😎 Street Rep: 5</div>
-                    </div>
+                <!-- Interaction Action Button Overlay -->
+                <div class="absolute bottom-4 right-4 flex gap-2">
+                    <button id="actionBtn" onclick="triggerInteraction()" class="hidden bg-brand-gold text-slate-900 px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-lg animate-pulse border-2 border-amber-300">
+                        <i class="fas fa-hand-pointer mr-1"></i> <span id="actionBtnLabel">INTERACT</span>
+                    </button>
+                    <button id="vehicleBtn" onclick="toggleVehicleState()" class="hidden bg-emerald-500 text-slate-900 px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-lg border-2 border-emerald-300">
+                        🚗 <span id="vehicleBtnLabel">ENTER CAR</span>
+                    </button>
                 </div>
             </div>
 
-            <button onclick="startGame()" class="w-full bg-brand-green hover:bg-emerald-600 text-slate-900 font-extrabold py-3.5 rounded-xl shadow-lg glow-green transition text-base">
-                ENTER THE SIMULATION <i class="fas fa-arrow-right ml-1"></i>
+            <!-- CONTROLS ROW (TOUCH / JOYSTICK & KEYBOARD HINTS) -->
+            <div class="bg-brand-cardBg border border-brand-border p-3 rounded-2xl flex flex-wrap justify-between items-center gap-3">
+                
+                <!-- D-PAD FOR TOUCH / MOBILE -->
+                <div class="grid grid-cols-3 gap-1 w-36 h-28">
+                    <div></div>
+                    <button id="btnUp" class="touch-btn bg-slate-800 active:bg-brand-green text-white font-bold rounded-xl flex items-center justify-center text-lg">▲</button>
+                    <div></div>
+                    <button id="btnLeft" class="touch-btn bg-slate-800 active:bg-brand-green text-white font-bold rounded-xl flex items-center justify-center text-lg">◀</button>
+                    <button id="btnDown" class="touch-btn bg-slate-800 active:bg-brand-green text-white font-bold rounded-xl flex items-center justify-center text-lg">▼</button>
+                    <button id="btnRight" class="touch-btn bg-slate-800 active:bg-brand-green text-white font-bold rounded-xl flex items-center justify-center text-lg">▶</button>
+                </div>
+
+                <!-- DESKTOP HINTS -->
+                <div class="text-xs text-slate-400 space-y-1 hidden sm:block">
+                    <div>🎮 <b>Keyboard:</b> Use <span class="text-white font-bold bg-slate-800 px-1.5 py-0.5 rounded">W A S D</span> or <span class="text-white font-bold bg-slate-800 px-1.5 py-0.5 rounded">Arrow Keys</span></div>
+                    <div>🚗 <b>Vehicles:</b> Walk near cars and press <span class="text-brand-gold font-bold bg-slate-800 px-1.5 py-0.5 rounded">E</span> or tap Enter Car</div>
+                    <div>🏠 <b>Buildings:</b> Walk into door entrances to enter house & rooms</div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="teleportLocation('house')" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3 py-2 rounded-xl border border-slate-700">
+                        🏠 Go Home
+                    </button>
+                    <button onclick="teleportLocation('streets')" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3 py-2 rounded-xl border border-slate-700">
+                        🏙️ Go Street
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT PANEL: LIVE MULTIPLAYER CHAT & FAMILY TREE (4 Cols) -->
+        <div class="lg:col-span-4 space-y-4 flex flex-col">
+            
+            <!-- LIVE MULTIPLAYER CHAT -->
+            <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 flex-1 flex flex-col h-[320px] lg:h-auto">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                        <i class="fas fa-comments text-emerald-400"></i> Nigeria Global Chat
+                    </h3>
+                    <span class="text-[10px] bg-emerald-950 text-emerald-400 font-mono font-bold px-2 py-0.5 rounded border border-emerald-800">
+                        🟢 <span id="onlinePlayerCount">142</span> Citizens Online
+                    </span>
+                </div>
+
+                <div id="chatStream" class="flex-1 overflow-y-auto space-y-2 text-xs pr-1 mb-3 bg-slate-950/60 border border-slate-800 p-2.5 rounded-xl">
+                    <!-- Dynamic chat messages -->
+                </div>
+
+                <form onsubmit="sendChatMessage(event)" class="flex gap-2">
+                    <input type="text" id="chatInput" placeholder="Send message to citizens..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-green">
+                    <button type="submit" class="bg-brand-green hover:bg-emerald-600 text-slate-900 font-extrabold px-3 py-2 rounded-xl text-xs transition">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- FAMILY & DYNASTY TREE MODAL / PANEL -->
+            <div id="familyPanel" class="bg-brand-cardBg border border-brand-border rounded-2xl p-4">
+                <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300 mb-3 flex items-center justify-between">
+                    <span><i class="fas fa-users text-brand-gold mr-1.5"></i> Family Dynasty</span>
+                    <button onclick="proposeMarry()" class="text-[10px] bg-brand-gold/20 text-brand-gold border border-brand-gold/40 px-2 py-1 rounded-lg hover:bg-brand-gold hover:text-slate-900 font-bold transition">
+                        💍 Propose / Marry
+                    </button>
+                </h3>
+
+                <div class="space-y-2 text-xs" id="familyList">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- DIALOGUE MODAL FOR FAMILY INTERACTION -->
+    <div id="dialogueModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-brand-cardBg border border-brand-border rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                <div class="w-12 h-12 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center text-3xl" id="dialogueAvatar">👩</div>
+                <div>
+                    <h3 class="font-bold text-white text-sm" id="dialogueName">Bisi (Wife)</h3>
+                    <p class="text-xs text-brand-gold" id="dialogueRole">Spouse</p>
+                </div>
+            </div>
+
+            <p class="text-slate-300 text-xs italic bg-slate-950 p-3 rounded-xl border border-slate-800" id="dialogueText">
+                "Welcome back home Emeka! Did you buy plantain on your way from Balogun market?"
+            </p>
+
+            <div class="space-y-2" id="dialogueOptions">
+                <!-- Buttons added dynamically -->
+            </div>
+
+            <button onclick="closeDialogue()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2 rounded-xl text-xs transition">
+                Close
             </button>
         </div>
     </div>
 
-    <!-- MAIN GAME LAYOUT -->
-    <main class="max-w-7xl w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
-
-        <!-- LEFT PANEL: PLAYER STATS & STATUS (4 cols) -->
-        <section class="lg:col-span-4 space-y-4">
-            <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-5 shadow-xl relative overflow-hidden">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-2xl" id="playerAvatar">
-                            🚲
-                        </div>
-                        <div>
-                            <h2 class="font-bold text-base text-white leading-tight" id="dispPlayerName">Emeka Okafor</h2>
-                            <p class="text-xs text-brand-gold font-semibold" id="dispTitle">Street Grinder</p>
-                        </div>
-                    </div>
-                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800" id="legendRank">
-                        🌱 Grassroots
-                    </span>
-                </div>
-
-                <div class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl mb-4 flex justify-between items-center">
-                    <div>
-                        <span class="text-[10px] uppercase font-bold text-slate-400">Total Capital</span>
-                        <div class="text-2xl font-black text-brand-gold font-mono" id="dispCash">₦25,000</div>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] uppercase font-bold text-slate-400">Monthly Tax</span>
-                        <div class="text-sm font-bold text-red-400 font-mono" id="dispTax">₦0</div>
-                    </div>
-                </div>
-
-                <div class="space-y-2.5 text-xs">
-                    <div>
-                        <div class="flex justify-between font-semibold mb-1">
-                            <span class="text-slate-300"><i class="fas fa-bolt text-amber-400 mr-1"></i> Energy</span>
-                            <span id="valEnergy" class="text-amber-400 font-mono">100/100</span>
-                        </div>
-                        <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-                            <div id="barEnergy" class="bg-amber-400 h-full transition-all duration-300" style="width: 100%;"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between font-semibold mb-1">
-                            <span class="text-slate-300"><i class="fas fa-brain text-purple-400 mr-1"></i> Intelligence</span>
-                            <span id="valIntel" class="text-purple-400 font-mono">40/100</span>
-                        </div>
-                        <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-                            <div id="barIntel" class="bg-purple-400 h-full transition-all duration-300" style="width: 40%;"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between font-semibold mb-1">
-                            <span class="text-slate-300"><i class="fas fa-crown text-brand-gold mr-1"></i> Street Rep</span>
-                            <span id="valRep" class="text-brand-gold font-mono">30/100</span>
-                        </div>
-                        <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-                            <div id="barRep" class="bg-brand-gold h-full transition-all duration-300" style="width: 30%;"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between font-semibold mb-1">
-                            <span class="text-slate-300"><i class="fas fa-landmark text-blue-400 mr-1"></i> Civic Standing</span>
-                            <span id="valCivic" class="text-blue-400 font-mono">50/100</span>
-                        </div>
-                        <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-                            <div id="barCivic" class="bg-blue-400 h-full transition-all duration-300" style="width: 50%;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ASSETS & DOCUMENTS SUMMARY -->
-            <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 space-y-2.5 text-xs">
-                <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                    <i class="fas fa-id-card text-brand-green"></i> Verified Identification & Assets
-                </h3>
-                <div class="flex justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
-                    <span class="text-slate-400">Passport Status:</span>
-                    <span id="dispPassport" class="font-bold text-red-400">None</span>
-                </div>
-                <div class="flex justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
-                    <span class="text-slate-400">NYSC Certificate:</span>
-                    <span id="dispNYSC" class="font-bold text-slate-500">Not Eligible</span>
-                </div>
-                <div class="flex justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
-                    <span class="text-slate-400">Highest Education:</span>
-                    <span id="dispEdu" class="font-bold text-white">SSCE / WAEC</span>
-                </div>
-                <div class="flex justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
-                    <span class="text-slate-400">Primary Career:</span>
-                    <span id="dispJob" class="font-bold text-brand-gold">Unemployed</span>
-                </div>
-
-                <button onclick="restAtHome()" class="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 p-2.5 rounded-xl font-bold transition flex items-center justify-center gap-2">
-                    <i class="fas fa-bed text-indigo-400"></i> Rest & Recharge (+Energy, -Stress)
-                </button>
-            </div>
-        </section>
-
-        <!-- CENTER PANEL: TAB NAVIGATION & MAIN ACTIONS (5 cols) -->
-        <section class="lg:col-span-5 space-y-4">
-            
-            <!-- Navigation Tabs -->
-            <div class="bg-brand-cardBg border border-brand-border p-1.5 rounded-2xl grid grid-cols-5 gap-1 text-center">
-                <button onclick="switchTab('hustle')" id="tabHustle" class="py-2 rounded-xl font-bold text-[11px] transition text-slate-900 bg-brand-green">
-                    💼 Work
-                </button>
-                <button onclick="switchTab('travel')" id="tabTravel" class="py-2 rounded-xl font-bold text-[11px] transition text-slate-400 hover:text-white">
-                    ✈️ Travel
-                </button>
-                <button onclick="switchTab('education')" id="tabEducation" class="py-2 rounded-xl font-bold text-[11px] transition text-slate-400 hover:text-white">
-                    🎓 School
-                </button>
-                <button onclick="switchTab('civics')" id="tabCivics" class="py-2 rounded-xl font-bold text-[11px] transition text-slate-400 hover:text-white">
-                    🏛️ Civics
-                </button>
-                <button onclick="switchTab('assets')" id="tabAssets" class="py-2 rounded-xl font-bold text-[11px] transition text-slate-400 hover:text-white">
-                    🏠 Assets
-                </button>
-            </div>
-
-            <!-- TAB 1: WORK & CAREERS -->
-            <div id="viewHustle" class="space-y-3">
-                <div class="text-xs text-slate-400 font-semibold px-1">QUICK HUSTLES & CAREERS</div>
-
-                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4">
-                    <h4 class="font-bold text-white text-sm mb-1">POS Terminal Operator</h4>
-                    <p class="text-xs text-slate-400 mb-3">Provide quick cash withdrawals and bill payments at busy bus stops.</p>
-                    <button onclick="doAction('pos_operator')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 w-full p-2.5 rounded-xl text-xs font-bold text-emerald-400 flex justify-between">
-                        <span>Run POS Shift</span>
-                        <span>+₦15,000 | -15⚡</span>
-                    </button>
-                </div>
-
-                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4">
-                    <h4 class="font-bold text-white text-sm mb-1">Nollywood Supporting Actor</h4>
-                    <p class="text-xs text-slate-400 mb-3">Audition for drama series set in Asaba or Lagos.</p>
-                    <button onclick="doAction('nollywood')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 w-full p-2.5 rounded-xl text-xs font-bold text-brand-gold flex justify-between">
-                        <span>Shoot Movie Scene</span>
-                        <span>+₦45,000 | -25⚡ | +5 Rep</span>
-                    </button>
-                </div>
-
-                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4">
-                    <h4 class="font-bold text-white text-sm mb-1">Tech Founder / Startup Freelancer</h4>
-                    <p class="text-xs text-slate-400 mb-3">Build fintech apps or consult for foreign remote clients.</p>
-                    <button onclick="doAction('tech_gig')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 w-full p-2.5 rounded-xl text-xs font-bold text-blue-400 flex justify-between">
-                        <span>Deliver Tech Contract</span>
-                        <span>+₦180,000 | -35⚡ | Req: High Intel</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- TAB 2: TRAVEL SYSTEM (36 STATES + GLOBAL) -->
-            <div id="viewTravel" class="space-y-3 hidden">
-                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4">
-                    <h4 class="font-bold text-white text-sm mb-2 flex items-center gap-2">
-                        <i class="fas fa-map-marked-alt text-emerald-400"></i> Interstate & Global Transit
-                    </h4>
-                    
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1">Destination Category</label>
-                            <select id="travelCategory" onchange="updateTravelOptions()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white">
-                                <option value="nigeria">🇳🇬 Nigerian States (36 States + FCT Abuja)</option>
-                                <option value="africa">🌍 African Destinations (6 Nations)</option>
-                                <option value="global">✈️ International Destinations (6 Nations)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1">Select Destination</label>
-                            <select id="travelDestinations" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white">
-                                <!-- Populated dynamically via JS -->
-                            </select>
-                        </div>
-
-                        <button onclick="executeTravel()" class="w-full bg-brand-green hover:bg-emerald-600 text-slate-900 font-extrabold py-3 rounded-xl text-xs shadow-lg glow-green transition">
-                            BOOK TRAVEL NOW
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3: EDUCATION -->
-            <div id="viewEducation" class="space-y-3 hidden">
-                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 space-y-3">
-                    <h4 class="font-bold text-white text-sm flex items-center gap-2">
-                        <i class="fas fa-graduation-cap text-purple-400"></i> Academic Progression
-                    </h4>
-
-                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
-                        <div>
-                            <div class="font-bold text-xs text-white">University Degree (B.Sc / HND)</div>
-                            <div class="text-[10px] text-slate-400">Cost: ₦250,000 | +30 Intelligence</div>
-                        </div>
-                        <button onclick="enrollEdu('University Degree', 250000, 30)" class="bg-brand-green hover:bg-emerald-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition">Enroll</button>
-                    </div>
-
-                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
-                        <div>
-                            <div class="font-bold text-xs text-white">Professional Cert (ICAN / NIM / SAN)</div>
-                            <div class="text-[10px] text-slate-400">Cost: ₦500,000 | +20 Intel | +25 Civic</div>
-                        </div>
-                        <button onclick="enrollEdu('Professional Cert', 500000, 20)" class="bg-brand-green hover:bg-emerald-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition">Enroll</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 4: GOVERNMENT & CIVICS -->
-            <div id="viewCivics" class="space-y-3 hidden">
-                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 space-y-3">
-                    <h4 class="font-bold text-white text-sm flex items-center gap-2">
-                        <i class="fas fa-landmark text-blue-400"></i> Government Agencies & Duties
-                    </h4>
-
-                    <!-- NIS Passport -->
-                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
-                        <div>
-                            <div class="font-bold text-xs text-white">NIS International Passport</div>
-                            <div class="text-[10px] text-slate-400">Cost: ₦75,000 | Required for Foreign Travel</div>
-                        </div>
-                        <button onclick="applyPassport()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">Apply</button>
-                    </div>
-
-                    <!-- NYSC -->
-                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
-                        <div>
-                            <div class="font-bold text-xs text-white">NYSC National Service</div>
-                            <div class="text-[10px] text-slate-400">Requires University Degree | +15 Civic</div>
-                        </div>
-                        <button onclick="doNYSC()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">Serve</button>
-                    </div>
-
-                    <!-- Politics -->
-                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
-                        <div>
-                            <div class="font-bold text-xs text-white">Run for House of Assembly / Governor</div>
-                            <div class="text-[10px] text-slate-400">Cost: ₦5,000,000 | Req: 60 Rep & 60 Civic</div>
-                        </div>
-                        <button onclick="runForOffice()" class="bg-brand-gold hover:bg-amber-400 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition">Campaign</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 5: ASSETS & REAL ESTATE -->
-            <div id="viewAssets" class="space-y-3 hidden">
-                <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 space-y-3">
-                    <h4 class="font-bold text-white text-sm flex items-center gap-2">
-                        <i class="fas fa-building text-brand-gold"></i> Landed Property & Holdings
-                    </h4>
-
-                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
-                        <div>
-                            <div class="font-bold text-xs text-white">Plot of Land in Ibeju-Lekki / Abuja</div>
-                            <div class="text-[10px] text-slate-400">Cost: ₦8,000,000</div>
-                        </div>
-                        <button onclick="buyAsset('Plot of Land', 8000000)" class="bg-brand-gold text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition">Acquire</button>
-                    </div>
-
-                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
-                        <div>
-                            <div class="font-bold text-xs text-white">Oil Block Shares</div>
-                            <div class="text-[10px] text-slate-400">Cost: ₦50,000,000</div>
-                        </div>
-                        <button onclick="buyAsset('Oil Block Shares', 50000000)" class="bg-brand-gold text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition">Acquire</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- RIGHT PANEL: LIVE LOG & EVENT CHRONICLES (3 cols) -->
-        <section class="lg:col-span-3 space-y-4 flex flex-col">
-            <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 flex-1 flex flex-col">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                        <i class="fas fa-stream text-brand-green"></i> Live Feed
-                    </h3>
-                    <span class="text-[10px] text-slate-500 font-mono">Real-time</span>
-                </div>
-                
-                <div id="eventLog" class="flex-1 overflow-y-auto space-y-2 text-xs pr-1 max-h-80 lg:max-h-none">
-                    <!-- Event items dynamically prepended -->
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="bg-slate-950 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
-        Naija Life: Hustle & Dynasty &copy; 2026. Built with ❤️ for the Culture.
-    </footer>
-
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT OPEN WORLD ENGINE -->
     <script>
-        // Web Audio API Sound Engine
-        let audioCtx = null;
-        let soundEnabled = false;
+        // ENGINE & WORLD STATE
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
-
-        function playSound(freq, type = 'sine', duration = 0.1) {
-            if (!soundEnabled || !audioCtx) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type;
-                osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch(e){}
-        }
-
-        function toggleAudio() {
-            initAudio();
-            soundEnabled = !soundEnabled;
-            const icon = document.getElementById('soundIcon');
-            icon.className = soundEnabled ? "fas fa-volume-high text-emerald-400" : "fas fa-volume-mute text-amber-400";
-            if (soundEnabled) playSound(523, 'triangle', 0.15);
-        }
-
-        // TRAVEL DATA: 36 STATES + GLOBAL NATIONS
-        const travelData = {
-            nigeria: [
-                "Abia State", "Adamawa State", "Akwa Ibom State", "Anambra State", "Bauchi State", 
-                "Bayelsa State", "Benue State", "Borno State", "Cross River State", "Delta State", 
-                "Ebonyi State", "Edo State", "Ekiti State", "Enugu State", "FCT Abuja", 
-                "Gombe State", "Imo State", "Jigawa State", "Kaduna State", "Kano State", 
-                "Katsina State", "Kebbi State", "Kogi State", "Kwara State", "Lagos State", 
-                "Nasarawa State", "Niger State", "Ogun State", "Ondo State", "Osun State", 
-                "Oyo State", "Plateau State", "Rivers State", "Sokoto State", "Taraba State", 
-                "Yobe State", "Zamfara State"
-            ],
-            africa: [
-                { name: "Ghana (Accra)", cost: 150000, visaReq: false },
-                { name: "Kenya (Nairobi)", cost: 350000, visaReq: false },
-                { name: "South Africa (Johannesburg)", cost: 600000, visaReq: true },
-                { name: "Egypt (Cairo)", cost: 550000, visaReq: true },
-                { name: "Morocco (Casablanca)", cost: 500000, visaReq: true },
-                { name: "Rwanda (Kigali)", cost: 300000, visaReq: false }
-            ],
-            global: [
-                { name: "United Kingdom (London)", cost: 1200000, visaReq: true },
-                { name: "United States (New York)", cost: 1500000, visaReq: true },
-                { name: "Canada (Toronto)", cost: 1600000, visaReq: true },
-                { name: "UAE (Dubai)", cost: 800000, visaReq: true },
-                { name: "China (Guangzhou)", cost: 1100000, visaReq: true },
-                { name: "Germany (Berlin)", cost: 1300000, visaReq: true }
+        let gameState = {
+            username: "Sammy_Hustler",
+            skin: "male_hustler",
+            cash: 150000,
+            energy: 100,
+            location: "streets", // "streets" or "house"
+            inVehicle: false,
+            family: [
+                { name: "Chief Okafor", relation: "Father", emoji: "👴", mood: "Proud" },
+                { name: "Mama Nkechi", relation: "Mother", emoji: "👵", mood: "Happy" },
+                { name: "Tunde", relation: "Cousin", emoji: "👦", mood: "Hustling" },
+                { name: "Blessing", relation: "Wife", emoji: "👩", mood: "Loving" },
+                { name: "Junior", relation: "Son", emoji: "👶", mood: "Playful" }
             ]
         };
 
-        // GAME STATE
-        let state = {
-            name: "Emeka Okafor",
-            bgKey: "street",
-            day: 1,
-            hour: 8,
-            cash: 25000,
-            energy: 100,
-            intel: 40,
-            rep: 30,
-            civic: 50,
-            location: "Lagos State",
-            passport: false,
-            education: "SSCE / WAEC",
-            nyscServed: false,
-            job: null,
-            tax: 0
+        // PLAYER OBJECT
+        const player = {
+            x: 400,
+            y: 240,
+            size: 24,
+            speed: 3.5,
+            dirX: 0,
+            dirY: 0,
+            color: "#008751"
         };
 
-        function selectBackground(key) {
-            state.bgKey = key;
-            document.querySelectorAll('[id^="bgCard-"]').forEach(c => c.classList.replace('border-brand-green', 'border-slate-800'));
-            document.getElementById(`bgCard-${key}`).classList.replace('border-slate-800', 'border-brand-green');
-            playSound(300);
+        // CAR OBJECT
+        const car = {
+            x: 260,
+            y: 200,
+            width: 50,
+            height: 28,
+            speed: 7,
+            color: "#FFD700"
+        };
+
+        // HOUSE & BUILDINGS WORLD BOUNDS
+        const houseDoors = { x: 520, y: 130, width: 60, height: 40 };
+
+        // INPUT LISTENERS
+        const keys = {};
+        window.addEventListener('keydown', e => {
+            keys[e.key.toLowerCase()] = true;
+            if (e.key.toLowerCase() === 'e') triggerInteraction();
+        });
+        window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+        // TOUCH CONTROLS BINDING
+        function bindTouchBtn(btnId, dirX, dirY) {
+            const btn = document.getElementById(btnId);
+            const start = (e) => { e.preventDefault(); player.dirX = dirX; player.dirY = dirY; };
+            const end = (e) => { e.preventDefault(); player.dirX = 0; player.dirY = 0; };
+            btn.addEventListener('touchstart', start);
+            btn.addEventListener('touchend', end);
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', end);
+        }
+        bindTouchBtn('btnUp', 0, -1);
+        bindTouchBtn('btnDown', 0, 1);
+        bindTouchBtn('btnLeft', -1, 0);
+        bindTouchBtn('btnRight', 1, 0);
+
+        // SELECTION & START
+        function selectSkin(skinKey) {
+            gameState.skin = skinKey;
+            document.querySelectorAll('[id^="skin-"]').forEach(b => b.classList.replace('border-brand-green', 'border-slate-800'));
+            document.getElementById(`skin-${skinKey}`).classList.replace('border-slate-800', 'border-brand-green');
         }
 
-        function startGame() {
-            initAudio();
-            const inputName = document.getElementById('playerNameInput').value.trim();
-            if (inputName) state.name = inputName;
-
-            if (state.bgKey === 'street') {
-                state.cash = 25000; state.intel = 40; state.rep = 30;
-            } else if (state.bgKey === 'student') {
-                state.cash = 100000; state.intel = 70; state.rep = 10;
-            } else if (state.bgKey === 'wealthy') {
-                state.cash = 1000000; state.intel = 50; state.rep = 5;
-            }
-
+        function confirmCharacter() {
+            const val = document.getElementById('usernameInput').value.trim();
+            if (val) gameState.username = val;
             document.getElementById('characterModal').classList.add('hidden');
-            addLog("🇳🇬 Welcome to Naija Life! Your nationwide simulation begins now.", "gold");
-            updateTravelOptions();
-            updateUI();
-            playSound(600, 'triangle', 0.25);
+            document.getElementById('displayUsername').innerText = gameState.username;
+            renderFamily();
+            addChatMessage("System", `Welcome ${gameState.username} to Lagos Streets!`, true);
         }
 
-        function updateUI() {
-            document.getElementById('dispPlayerName').innerText = state.name;
-            document.getElementById('dispCash').innerText = `₦${state.cash.toLocaleString()}`;
-            document.getElementById('dispTax').innerText = `₦${state.tax.toLocaleString()}`;
-            document.getElementById('gameDay').innerText = state.day;
-            document.getElementById('currentLocName').innerText = state.location;
-
-            document.getElementById('valEnergy').innerText = `${state.energy}/100`;
-            document.getElementById('barEnergy').style.width = `${state.energy}%`;
-
-            document.getElementById('valIntel').innerText = `${state.intel}/100`;
-            document.getElementById('barIntel').style.width = `${state.intel}%`;
-
-            document.getElementById('valRep').innerText = `${state.rep}/100`;
-            document.getElementById('barRep').style.width = `${state.rep}%`;
-
-            document.getElementById('valCivic').innerText = `${state.civic}/100`;
-            document.getElementById('barCivic').style.width = `${state.civic}%`;
-
-            document.getElementById('dispPassport').innerText = state.passport ? "Verified" : "None";
-            document.getElementById('dispPassport').className = state.passport ? "font-bold text-emerald-400" : "font-bold text-red-400";
-
-            document.getElementById('dispNYSC').innerText = state.nyscServed ? "Completed" : (state.education.includes("University") ? "Eligible" : "Not Eligible");
-            document.getElementById('dispEdu').innerText = state.education;
-            document.getElementById('dispJob').innerText = state.job || "Unemployed";
+        // TELEPORTATION & WORLD SWITCHING
+        function teleportLocation(loc) {
+            gameState.location = loc;
+            document.getElementById('displayLocation').innerText = loc === 'streets' ? 'LAGOS STREETS' : 'PERSONAL HOUSE';
+            player.x = 400;
+            player.y = 300;
+            if (gameState.inVehicle) toggleVehicleState();
+            notify(`Switched location to ${loc.toUpperCase()}`);
         }
 
-        function addLog(msg, type = "normal") {
-            const logBox = document.getElementById('eventLog');
-            const item = document.createElement('div');
-            let color = "bg-slate-900 border-slate-800 text-slate-300";
-            if (type === "gold") color = "bg-amber-950/40 border-amber-800 text-amber-300 font-semibold";
-            if (type === "green") color = "bg-emerald-950/40 border-emerald-800 text-emerald-300 font-semibold";
-            if (type === "red") color = "bg-red-950/40 border-red-800 text-red-300";
-
-            item.className = `p-2 rounded-xl border ${color} text-xs`;
-            item.innerHTML = `<span class="text-[9px] opacity-60 block font-mono">Day ${state.day}</span>${msg}`;
-            logBox.prepend(item);
-        }
-
-        // TRAVEL CONTROLLER
-        function updateTravelOptions() {
-            const category = document.getElementById('travelCategory').value;
-            const select = document.getElementById('travelDestinations');
-            select.innerHTML = '';
-
-            if (category === 'nigeria') {
-                travelData.nigeria.forEach(stateName => {
-                    const opt = document.createElement('option');
-                    opt.value = stateName;
-                    opt.innerText = `${stateName} (Bus / Flight: ₦25,000)`;
-                    select.appendChild(opt);
-                });
+        function toggleVehicleState() {
+            if (gameState.location !== 'streets') return;
+            gameState.inVehicle = !gameState.inVehicle;
+            const btnLabel = document.getElementById('vehicleBtnLabel');
+            if (gameState.inVehicle) {
+                btnLabel.innerText = "EXIT CAR";
+                notify("🚗 Entered Vehicle! Moving faster.");
             } else {
-                travelData[category].forEach(dest => {
-                    const opt = document.createElement('option');
-                    opt.value = JSON.stringify(dest);
-                    opt.innerText = `${dest.name} - ₦${dest.cost.toLocaleString()} ${dest.visaReq ? '(Visa Required)' : '(No Visa)'}`;
-                    select.appendChild(opt);
+                btnLabel.innerText = "ENTER CAR";
+                player.x = car.x + 60;
+                player.y = car.y;
+                notify("🚶 Exited Vehicle.");
+            }
+        }
+
+        // GAME LOOP
+        function update() {
+            // Movement Direction Determination
+            let dx = player.dirX;
+            let dy = player.dirY;
+
+            if (keys['w'] || keys['arrowup']) dy = -1;
+            if (keys['s'] || keys['arrowdown']) dy = 1;
+            if (keys['a'] || keys['arrowleft']) dx = -1;
+            if (keys['d'] || keys['arrowright']) dx = 1;
+
+            const currentSpeed = gameState.inVehicle ? car.speed : player.speed;
+
+            if (gameState.inVehicle) {
+                car.x += dx * currentSpeed;
+                car.y += dy * currentSpeed;
+                car.x = Math.max(20, Math.min(canvas.width - 70, car.x));
+                car.y = Math.max(20, Math.min(canvas.height - 50, car.y));
+                player.x = car.x + 15;
+                player.y = car.y + 5;
+            } else {
+                player.x += dx * currentSpeed;
+                player.y += dy * currentSpeed;
+                player.x = Math.max(20, Math.min(canvas.width - 20, player.x));
+                player.y = Math.max(20, Math.min(canvas.height - 20, player.y));
+            }
+
+            // Check Proximity to Car / Doors
+            const carBtn = document.getElementById('vehicleBtn');
+            const actionBtn = document.getElementById('actionBtn');
+
+            const distToCar = Math.hypot(player.x - car.x, player.y - car.y);
+            if (gameState.location === 'streets' && distToCar < 60) {
+                carBtn.classList.remove('hidden');
+            } else if (!gameState.inVehicle) {
+                carBtn.classList.add('hidden');
+            }
+
+            // Door Collision Check
+            if (gameState.location === 'streets' && player.x > houseDoors.x && player.x < houseDoors.x + houseDoors.width && player.y < houseDoors.y + houseDoors.height) {
+                teleportLocation('house');
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (gameState.location === 'streets') {
+                // DRAW STREET MAP
+                ctx.fillStyle = "#1E293B";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Roads
+                ctx.fillStyle = "#334155";
+                ctx.fillRect(0, 180, canvas.width, 120); // Horizontal Main Expressway
+                ctx.fillRect(360, 0, 120, canvas.height); // Vertical Bus Lane
+
+                // Road markings
+                ctx.strokeStyle = "#FFD700";
+                ctx.setLineDash([15, 15]);
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, 240); ctx.lineTo(canvas.width, 240);
+                ctx.moveTo(420, 0); ctx.lineTo(420, canvas.height);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // House Building
+                ctx.fillStyle = "#0F172A";
+                ctx.fillRect(houseDoors.x - 40, 20, 140, 100);
+                ctx.fillStyle = "#008751";
+                ctx.fillRect(houseDoors.x, houseDoors.y - 10, houseDoors.width, 20);
+                ctx.fillStyle = "#FFFFFF";
+                ctx.font = "bold 12px sans-serif";
+                ctx.fillText("MY HOUSE (ENTRANCE)", houseDoors.x - 35, 45);
+
+                // Draw Car
+                ctx.fillStyle = car.color;
+                ctx.beginPath();
+                ctx.roundRect(car.x, car.y, car.width, car.height, 6);
+                ctx.fill();
+                ctx.fillStyle = "#000";
+                ctx.fillRect(car.x + 8, car.y + 4, 12, car.height - 8);
+
+            } else {
+                // DRAW INTERIOR HOUSE MAP
+                ctx.fillStyle = "#3F2E56"; // Living Room Carpet
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Furniture
+                ctx.fillStyle = "#1E1B4B";
+                ctx.fillRect(100, 60, 200, 60); // Sofa
+                ctx.fillStyle = "#F59E0B";
+                ctx.fillRect(600, 80, 120, 120); // Master Bed
+
+                // Exit Door
+                ctx.fillStyle = "#EF4444";
+                ctx.fillRect(370, 440, 60, 30);
+                ctx.fillStyle = "#FFF";
+                ctx.font = "11px sans-serif";
+                ctx.fillText("EXIT TO STREET", 355, 430);
+
+                if (player.y > 420 && player.x > 350 && player.x < 450) {
+                    teleportLocation('streets');
+                }
+
+                // Render Family NPCs inside house
+                gameState.family.forEach((member, i) => {
+                    const npcX = 150 + (i * 110);
+                    const npcY = 160;
+                    ctx.font = "24px sans-serif";
+                    ctx.fillText(member.emoji, npcX, npcY);
+                    ctx.font = "10px sans-serif";
+                    ctx.fillStyle = "#FFF";
+                    ctx.fillText(member.name, npcX - 10, npcY + 15);
+
+                    // Proximity check for interaction
+                    if (Math.hypot(player.x - npcX, player.y - npcY) < 40) {
+                        ctx.fillStyle = "#FFD700";
+                        ctx.fillText("Press E to Talk", npcX - 20, npcY - 30);
+                        if (keys['e']) openDialogue(member);
+                    }
                 });
             }
+
+            // DRAW PLAYER (IF NOT IN VEHICLE)
+            if (!gameState.inVehicle) {
+                ctx.fillStyle = "#008751";
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#FFD700";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Username Label
+                ctx.fillStyle = "#FFF";
+                ctx.font = "bold 11px sans-serif";
+                ctx.fillText(gameState.username, player.x - 30, player.y - 18);
+            }
         }
 
-        function executeTravel() {
-            const category = document.getElementById('travelCategory').value;
-            const rawVal = document.getElementById('travelDestinations').value;
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
 
-            if (category === 'nigeria') {
-                if (state.cash < 25000) return addLog("❌ Not enough funds for interstate travel!", "red");
-                state.cash -= 25000;
-                state.location = rawVal;
-                addLog(`🚌 Traveled safely to ${rawVal}.`, "green");
+        // DIALOGUE SYSTEM
+        function openDialogue(member) {
+            document.getElementById('dialogueName').innerText = `${member.name} (${member.relation})`;
+            document.getElementById('dialogueRole').innerText = `Status: ${member.mood}`;
+            document.getElementById('dialogueAvatar').innerText = member.emoji;
+            document.getElementById('dialogueText').innerText = `"Hello ${gameState.username}! Good to see you inside the family home. How is your hustle today?"`;
+
+            const opts = document.getElementById('dialogueOptions');
+            opts.innerHTML = `
+                <button onclick="respondDialogue('give_money')" class="w-full bg-emerald-950 border border-emerald-800 text-emerald-300 p-2 rounded-xl text-xs font-bold text-left">
+                    💵 Give ₦10,000 allowance (+Happiness)
+                </button>
+                <button onclick="respondDialogue('ask_advice')" class="w-full bg-slate-900 border border-slate-800 text-slate-300 p-2 rounded-xl text-xs font-bold text-left">
+                    🗣️ Ask for business advice
+                </button>
+            `;
+            document.getElementById('dialogueModal').classList.remove('hidden');
+        }
+
+        function respondDialogue(type) {
+            if (type === 'give_money') {
+                if (gameState.cash >= 10000) {
+                    gameState.cash -= 10000;
+                    document.getElementById('dispCash').innerText = `₦${gameState.cash.toLocaleString()}`;
+                    notify("❤️ Family happiness increased!");
+                } else {
+                    notify("❌ Not enough cash!");
+                }
             } else {
-                const dest = JSON.parse(rawVal);
-                if (dest.visaReq && !state.passport) {
-                    addLog(`❌ Travel denied! You need an NIS International Passport to visit ${dest.name}.`, "red");
-                    return;
-                }
-                if (state.cash < dest.cost) {
-                    addLog(`❌ Insufficient cash to book flight to ${dest.name}!`, "red");
-                    return;
-                }
-                state.cash -= dest.cost;
-                state.location = dest.name;
-                addLog(`✈️ Flight landed in ${dest.name}! Welcome abroad!`, "gold");
+                notify("💡 Advice: 'Patience and consistency build legendary dynasties in Naija.'");
             }
-            playSound(500, 'triangle', 0.2);
-            updateUI();
+            closeDialogue();
         }
 
-        // ACTIONS
-        function doAction(type) {
-            if (state.energy < 15) return addLog("🛑 Exhausted! Rest before working.", "red");
-
-            if (type === 'pos_operator') {
-                state.cash += 15000; state.energy -= 15;
-                addLog("🏧 Managed POS transactions. Made ₦15,000 profit.", "green");
-            } else if (type === 'nollywood') {
-                state.cash += 45000; state.energy -= 25; state.rep += 5;
-                addLog("🎬 Performed movie scene! Earned ₦45,000 & +5 Street Rep.", "gold");
-            } else if (type === 'tech_gig') {
-                if (state.intel < 60) return addLog("❌ Intelligence too low for advanced tech gigs!", "red");
-                state.cash += 180000; state.energy -= 35;
-                addLog("💻 Delivered fintech app feature. Received ₦180,000 payout!", "green");
-            }
-            playSound(440);
-            updateUI();
+        function closeDialogue() {
+            document.getElementById('dialogueModal').classList.add('hidden');
         }
 
-        function restAtHome() {
-            state.energy = 100;
-            state.day++;
-            addLog(`🛌 Slept well. Day ${state.day} in ${state.location} begins!`, "green");
-            playSound(350);
-            updateUI();
-        }
-
-        function enrollEdu(title, cost, intelGain) {
-            if (state.cash < cost) return addLog(`❌ Need ₦${cost.toLocaleString()} for enrollment!`, "red");
-            state.cash -= cost;
-            state.intel += intelGain;
-            state.education = title;
-            addLog(`🎓 Successfully graduated with a ${title}! (+${intelGain} Intelligence)`, "gold");
-            playSound(600);
-            updateUI();
-        }
-
-        function applyPassport() {
-            if (state.cash < 75000) return addLog("❌ Need ₦75,000 for NIS Passport issuance!", "red");
-            state.cash -= 75000;
-            state.passport = true;
-            addLog("🛂 NIS International Passport issued successfully!", "gold");
-            playSound(600);
-            updateUI();
-        }
-
-        function doNYSC() {
-            if (!state.education.includes("University")) return addLog("❌ You must earn a University Degree first!", "red");
-            if (state.nyscServed) return addLog("❌ You have already completed NYSC!", "red");
-            state.nyscServed = true;
-            state.civic += 25;
-            addLog("🎖️ Served Nigeria for NYSC mandatory year! (+25 Civic Standing)", "gold");
-            playSound(600);
-            updateUI();
-        }
-
-        function runForOffice() {
-            if (state.cash < 5000000 || state.rep < 60) return addLog("❌ Requires ₦5,000,000 campaign funds and 60 Rep!", "red");
-            state.cash -= 5000000;
-            state.job = "State Governor";
-            addLog("🏛️ ELECTION VICTORY! You have been sworn in as Governor!", "gold");
-            playSound(800, 'triangle', 0.4);
-            updateUI();
-        }
-
-        function buyAsset(name, cost) {
-            if (state.cash < cost) return addLog(`❌ Insufficient funds to buy ${name}!`, "red");
-            state.cash -= cost;
-            addLog(`🏰 Purchased ${name} successfully! Asset added to your portfolio.`, "gold");
-            playSound(700);
-            updateUI();
-        }
-
-        function switchTab(tab) {
-            ['Hustle', 'Travel', 'Education', 'Civics', 'Assets'].forEach(t => {
-                document.getElementById(`view${t}`).classList.add('hidden');
-                document.getElementById(`tab${t}`).className = "py-2 rounded-xl font-bold text-[11px] transition text-slate-400 hover:text-white";
+        // FAMILY TREE RENDER
+        function renderFamily() {
+            const list = document.getElementById('familyList');
+            list.innerHTML = '';
+            gameState.family.forEach(member => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center p-2 rounded-xl bg-slate-950 border border-slate-800";
+                div.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-base">${member.emoji}</span>
+                        <div>
+                            <div class="font-bold text-white">${member.name}</div>
+                            <div class="text-[10px] text-slate-400">${member.relation}</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] bg-slate-900 text-brand-gold px-2 py-0.5 rounded font-semibold border border-slate-700">${member.mood}</span>
+                `;
+                list.appendChild(div);
             });
-            document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
-            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "py-2 rounded-xl font-bold text-[11px] transition text-slate-900 bg-brand-green";
-            playSound(300);
+            document.getElementById('familyCount').innerText = gameState.family.length;
         }
 
-        // SAVE / LOAD SYSTEM
+        function proposeMarry() {
+            notify("💍 You are already married to Blessing! Family dynasty is active.");
+        }
+
+        // MULTIPLAYER CHAT SIMULATION
+        function addChatMessage(user, msg, isSystem = false) {
+            const stream = document.getElementById('chatStream');
+            const div = document.createElement('div');
+            div.className = isSystem ? "p-1.5 rounded-lg bg-amber-950/40 border border-amber-800/60 text-amber-300 text-[11px]" : "p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-[11px]";
+            div.innerHTML = `<b class="${isSystem ? 'text-amber-400' : 'text-emerald-400'}">${user}:</b> ${msg}`;
+            stream.appendChild(div);
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function sendChatMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const txt = input.value.trim();
+            if (!txt) return;
+            addChatMessage(gameState.username, txt);
+            input.value = '';
+
+            // Simulated bot responses from citizens online
+            setTimeout(() => {
+                const names = ["Tobi_Abuja", "Chidi_PH", "Keke_Rider", "Nollywood_Star"];
+                const msgs = ["Anybody selling land in Ibeju Lekki?", "Traffic on Third Mainland bridge is heavy o!", "Who wants to partner for a POS shop?", "Naija life smooth!"];
+                const rName = names[Math.floor(Math.random() * names.length)];
+                const rMsg = msgs[Math.floor(Math.random() * msgs.length)];
+                addChatMessage(rName, rMsg);
+            }, 1800);
+        }
+
+        function triggerInteraction() {
+            if (gameState.location === 'streets') {
+                notify("🏙️ Walking along Lagos Streets.");
+            }
+        }
+
+        function notify(msg) {
+            const el = document.getElementById('gameNotification');
+            el.innerText = msg;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 3000);
+        }
+
         function saveGame() {
-            localStorage.setItem('naijaLifeSave', JSON.stringify(state));
-            addLog("💾 Game progress saved to browser memory!", "green");
-            playSound(650);
+            localStorage.setItem('naijaLifeOpenWorld', JSON.stringify(gameState));
+            notify("💾 Progress saved to browser memory!");
         }
 
-        function loadGame() {
-            const saved = localStorage.getItem('naijaLifeSave');
-            if (saved) {
-                state = JSON.parse(saved);
-                document.getElementById('characterModal').classList.add('hidden');
-                updateTravelOptions();
-                updateUI();
-                addLog("📂 Saved game loaded successfully!", "gold");
-            }
-        }
-
-        function confirmRestart() {
-            if (confirm("Reset current simulation and restart?")) {
-                localStorage.removeItem('naijaLifeSave');
-                location.reload();
-            }
-        }
-
-        // Auto Load on Startup if Save Exists
+        // STARTUP
         window.onload = () => {
-            if (localStorage.getItem('naijaLifeSave')) {
-                loadGame();
+            const saved = localStorage.getItem('naijaLifeOpenWorld');
+            if (saved) {
+                try {
+                    gameState = JSON.parse(saved);
+                    document.getElementById('characterModal').classList.add('hidden');
+                    document.getElementById('displayUsername').innerText = gameState.username;
+                    renderFamily();
+                } catch(e){}
             }
+            // Add initial chat simulation
+            addChatMessage("Chidi_PH", "Good day everyone! How's the hustle today?");
+            addChatMessage("Anita_Enugu", "Just bought my second car in Enugu state!");
+            
+            gameLoop();
         };
     </script>
 </body>
